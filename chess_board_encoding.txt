@@ -1,0 +1,53 @@
+# Chess Board Encoding for Neural Network Training
+
+This document outlines the encoding scheme for converting FEN strings into a format suitable for neural network input.
+
+## 1. Piece Planes (One-Hot Encoding)
+- The board is represented as a tensor of shape (8, 8, 12):
+  - 8x8: Board squares (ranks x files)
+  - 12 channels: One for each piece type:
+    - 0: White Pawn (P)
+    - 1: White Knight (N)
+    - 2: White Bishop (B)
+    - 3: White Rook (R)
+    - 4: White Queen (Q)
+    - 5: White King (K)
+    - 6: Black Pawn (p)
+    - 7: Black Knight (n)
+    - 8: Black Bishop (b)
+    - 9: Black Rook (r)
+    - 10: Black Queen (q)
+    - 11: Black King (k)
+- For each square, set the corresponding channel to 1 if that piece is present, else 0.
+
+## 2. Side to Move
+- 1 if white to move, 0 if black to move.
+- Can be appended as a single binary feature or as an (8, 8, 1) plane with all values set to 1 or 0.
+
+## 3. Castling Rights
+- Four binary features:
+  - White kingside (K)
+  - White queenside (Q)
+  - Black kingside (k)
+  - Black queenside (q)
+- Each is 1 if the right is available, else 0.
+- Can be appended as a flat vector or as (8, 8, 4) planes with all values set to 1 or 0.
+
+## 4. En Passant
+- Represented as an (8, 8, 1) plane:
+  - 1 at the en passant target square, 0 elsewhere.
+  - If no en passant is available, all zeros.
+
+## 5. Final Input Shape
+- Concatenate all planes:
+  - (8, 8, 12) for pieces
+  - (8, 8, 1) for side to move
+  - (8, 8, 4) for castling rights
+  - (8, 8, 1) for en passant
+- **Total shape:** (8, 8, 18)
+
+## 6. Optional Features
+- Halfmove clock and fullmove number can be added as normalized scalar features if desired.
+
+---
+This encoding is suitable for convolutional neural networks and preserves all relevant information from the FEN string.
